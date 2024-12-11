@@ -1,21 +1,15 @@
-from typing import Callable
+import sys
+import os
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from utils.operate_on_lines import operate_on_lines
 
 SPACE = "   "
-
-def operate_on_lines(callback: Callable[[str], None]) -> str:
-  with open("input.txt") as f:
-    lines = f.readlines()
-    for line in lines: 
-      stripped_line = line.strip()
-      callback(stripped_line)
 
 def get_numbers(stripped_line: str):
       numbers = [int(i) for i in stripped_line.split(SPACE)]
       return numbers[0], numbers[1]
-
-
-
 
 def one_a():
     list1 = []

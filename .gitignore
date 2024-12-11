@@ -2,3 +2,4 @@
 /.vscode
 */input.txt
 */testinput.txt
+*__pycache__
