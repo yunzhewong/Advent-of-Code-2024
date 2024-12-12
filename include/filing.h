@@ -11,4 +11,4 @@ std::ifstream getMainFile(int number);
 std::ifstream getTestFile(int number);
 
 void operate_on_lines(int number, callbackOnFileLine fn);
-void operate_on_lines(int number, callbackOnFileLine fn);
+void operate_on_test(int number, callbackOnFileLine fn);

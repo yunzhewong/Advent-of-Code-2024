@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <optional>
 #include <sstream>
 #include <unordered_map>
 #include <vector>
@@ -19,11 +20,14 @@ int toInt(std::string val) { return std::stoi(val); }
 Rule parse_rule(std::string line) {
   std::vector<std::string> strings = utils::split(line, '|');
   std::vector<int> numbers = utils::map<std::string, int>(strings, toInt);
-
   return Rule{numbers[0], numbers[1]};
 }
 
-std::vector<int> parse_updates(std::string line) {}
+std::vector<int> parse_updates(std::string line) {
+  std::vector<std::string> strings = utils::split(line, ',');
+  std::vector<int> numbers = utils::map<std::string, int>(strings, toInt);
+  return numbers;
+}
 
 struct FileInfo {
   std::unordered_map<int, std::vector<int>> rules;
@@ -45,32 +49,65 @@ FileInfo parse_file() {
       info.rules[rule.x].push_back(rule.y);
       return;
     }
+
+    std::vector<int> updates = parse_updates(line);
+    info.all_updates.push_back(updates);
   });
+
+  return info;
+}
+
+std::optional<std::tuple<int, int>> get_invalidating_update(
+    std::unordered_map<int, std::vector<int>> rules, std::vector<int> updates) {
+  for (size_t i = 0; i < updates.size(); ++i) {
+    int current_update = updates[i];
+
+    std::vector<int> matching_rules = rules[current_update];
+
+    for (size_t j = i + 1; j < updates.size(); ++j) {
+      int later_update = updates[j];
+
+      bool update_found = false;
+
+      for (int rule : matching_rules) {
+        if (rule == later_update) {
+          update_found = true;
+          break;
+        }
+      }
+
+      if (!update_found) {
+        return std::make_tuple(current_update, later_update);
+      }
+    }
+  }
+  return std::nullopt;
+}
+
+bool updates_valid(std::unordered_map<int, std::vector<int>> rules,
+                   std::vector<int> updates) {
+  auto invalidating_update = get_invalidating_update(rules, updates);
+  return !invalidating_update.has_value();
+}
+
+int get_middle_value(std::vector<int> updates) {
+  int middle_index = (int)((updates.size() - 1) / 2);
+  return updates[middle_index];
+}
+
+void five_a() {
+  FileInfo info = parse_file();
+  int total = 0;
+
+  for (std::vector<int> updates : info.all_updates) {
+    if (!updates_valid(info.rules, updates)) {
+      continue;
+    }
+
+    total += get_middle_value(updates);
+  }
+
   std::cout << total << "\n";
 }
-// state = State()
-
-//     all_updates = []
-
-//                   def
-//                   fn(line
-//                      : str)
-//     : if line == "" : state.found_space = True return
-
-//                                           if not state.found_space : x,
-// y = parse_rule(line)
-
-//     arr = state.rules.get(x, []) arr.append(y) state.rules[x] = arr return
-
-//     updates = parse_updates(line) all_updates
-//                   .append(updates)
-
-//                       operate_on_lines(fn)
-
-//                           return state.rules,
-// all_updates
-}
-
-void five_a() {}
 
 void five() { five_a(); };

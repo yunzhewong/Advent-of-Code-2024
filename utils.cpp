@@ -5,8 +5,8 @@ std::vector<std::string> utils::split(std::string& string, char character) {
 
   size_t start = 0;
 
-  for (int i = 0; i < string.length(); ++i) {
-    char current_char = string[0];
+  for (size_t i = 0; i < string.length(); ++i) {
+    char current_char = string[i];
 
     if (current_char == character) {
       output.push_back(string.substr(start, i - start));
@@ -17,3 +17,4 @@ std::vector<std::string> utils::split(std::string& string, char character) {
   output.push_back(string.substr(start, string.length() - start));
 
   return output;
+}

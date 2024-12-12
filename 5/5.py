@@ -80,10 +80,7 @@ def five_a():
         if not updates_valid(rules, updates):
             continue
 
-        middle_index = int((len(updates) - 1) / 2)
-        middle_page = updates[middle_index]
-
-        total += middle_page
+        total += get_middle_value(updates)
 
     print(total)
 
