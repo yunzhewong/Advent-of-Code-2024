@@ -47,13 +47,18 @@ def is_xmas(
     return True
 
 
-def four_a():
+def create_string_grid():
     string_grid = []
 
     def fn(line: str):
         string_grid.append(line)
 
     operate_on_lines(fn)
+    return string_grid
+
+
+def four_a():
+    string_grid = create_string_grid()
 
     height = len(string_grid)
     width = len(string_grid[0])
@@ -87,5 +92,41 @@ def four_a():
     print(total)
 
 
+def is_mas(
+    string_grid: List[List[str]], i: int, j: int, fn: Callable[[], Tuple[int, int]]
+):
+    v, h = fn()
+
+    letters = []
+    letters.append(get_string_grid(string_grid, i - v, j - h))
+    letters.append(get_string_grid(string_grid, i + v, j + h))
+
+    if "M" in letters and "S" in letters:
+        return True
+
+    return False
+
+
+def four_b():
+    string_grid = create_string_grid()
+
+    height = len(string_grid)
+    width = len(string_grid[0])
+
+    total = 0
+
+    for i in range(height):
+        for j in range(width):
+            char = string_grid[i][j]
+
+            if char != "A":
+                continue
+
+            mas_diagonal1 = is_mas(string_grid, i, j, lambda: move_diagonal_1(1))
+            mas_diagonal2 = is_mas(string_grid, i, j, lambda: move_diagonal_2(1))
+            if mas_diagonal1 and mas_diagonal2:
+                total += 1
+
+
 if __name__ == "__main__":
-    four_a()
+    four_b()
