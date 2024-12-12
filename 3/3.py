@@ -61,5 +61,44 @@ def three_a():
     print(total_sum[0])
 
 
+def change_state(string: str):
+    if string.startswith("do()"):
+        return True
+
+    if string.startswith("don't()"):
+        return False
+
+    return None
+
+
+class State:
+    def __init__(self):
+        self.sum = 0
+        self.enabled = True
+
+
+def three_b():
+    state = State()
+
+    def fn(stripped_line: str):
+        for i in range(len(stripped_line)):
+            if stripped_line[i] == "m":
+                if not state.enabled:
+                    continue
+
+                value = get_value(stripped_line[i : i + MAX_LENGTH])
+                if value is not None:
+                    state.sum += value
+
+            if stripped_line[i] == "d":
+                new_enabled_state = change_state(stripped_line[i : i + len("don't()")])
+
+                if new_enabled_state is not None:
+                    state.enabled = new_enabled_state
+
+    operate_on_lines(fn)
+    print(state.sum)
+
+
 if __name__ == "__main__":
-    three_a()
+    three_b()
