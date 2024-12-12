@@ -63,4 +63,38 @@ void two_a() {
   std::cout << safe_lines << "\n";
 }
 
-void two() { two_a(); }
+void two_b() {
+  std::ifstream file = getMainFile(2);
+
+  int safe_lines = 0;
+  std::string line;
+  while (std::getline(file, line)) {
+    std::vector<int> numbers = get_numbers(line);
+
+    if (is_safe(numbers)) {
+      safe_lines += 1;
+      continue;
+    }
+
+    for (size_t i = 0; i < numbers.size(); i++) {
+      std::vector<int> sectioned_numbers;
+
+      for (size_t j = 0; j < i; ++j) {
+        sectioned_numbers.push_back(numbers[j]);
+      }
+
+      for (size_t j = i + 1; j < numbers.size(); ++j) {
+        sectioned_numbers.push_back(numbers[j]);
+      }
+
+      if (is_safe(sectioned_numbers)) {
+        safe_lines += 1;
+        break;
+      }
+    }
+  }
+
+  std::cout << safe_lines << "\n";
+}
+
+void two() { two_b(); }
