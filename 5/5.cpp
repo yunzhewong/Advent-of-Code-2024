@@ -110,4 +110,60 @@ void five_a() {
   std::cout << total << "\n";
 }
 
-void five() { five_a(); };
+int get_update_index(std::vector<int> updates, int update_value) {
+  int update_index = -1;
+
+  for (size_t i = 0; i < updates.size(); ++i) {
+    if (updates[i] == update_value) {
+      update_index = i;
+      break;
+    }
+  }
+
+  if (update_index == -1) {
+    throw std::runtime_error("Expected to find later update");
+  }
+
+  return update_index;
+}
+
+std::vector<int> fix_incorrect_updates(
+    std::unordered_map<int, std::vector<int>> rules, std::vector<int> updates) {
+  while (true) {
+    auto invalidating_update = get_invalidating_update(rules, updates);
+
+    if (!invalidating_update.has_value()) {
+      break;
+    }
+
+    auto [current_update, later_update] = invalidating_update.value();
+
+    int later_update_index = get_update_index(updates, later_update);
+    updates.erase(updates.begin() + later_update_index);
+    int update_index = get_update_index(updates, current_update);
+    updates.insert(updates.begin() + update_index, later_update);
+  }
+
+  return updates;
+}
+
+void five_b() {
+  FileInfo info = parse_file();
+
+  int total = 0;
+
+  for (std::vector<int> updates : info.all_updates) {
+    if (updates_valid(info.rules, updates)) {
+      continue;
+    }
+
+    std::vector<int> correct_updates =
+        fix_incorrect_updates(info.rules, updates);
+
+    total += get_middle_value(correct_updates);
+  }
+
+  std::cout << total << "\n";
+}
+
+void five() { five_b(); };
