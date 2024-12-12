@@ -3,7 +3,6 @@
 #include <functional>
 #include <iostream>
 #include <string>
-#include <vector>
 
 #include "filing.h"
 
@@ -59,6 +58,22 @@ class StringGrid {
     }
 
     return true;
+  }
+
+  bool is_mas(int i, int j, std::function<std::tuple<int, int>()> fn) {
+    auto [v, h] = fn();
+
+    char letter_1 = get(i - v, j - h);
+    char letter_2 = get(i + v, j + h);
+
+    bool orientation_1 = letter_1 == 'M' && letter_2 == 'S';
+    bool orientation_2 = letter_1 == 'S' && letter_2 == 'M';
+
+    if (orientation_1 || orientation_2) {
+      return true;
+    }
+
+    return false;
   }
 
   void print() {
@@ -129,4 +144,31 @@ void four_a() {
   std::cout << xmases << "\n";
 }
 
-void four() { four_a(); }
+void four_b() {
+  StringGrid grid;
+  size_t height = grid.get_height();
+  size_t width = grid.get_width();
+
+  int xmases = 0;
+  for (size_t i = 0; i < height; ++i) {
+    for (size_t j = 0; j < width; ++j) {
+      int v = static_cast<int>(i);
+      int h = static_cast<int>(j);
+
+      if (grid.get(v, h) != 'A') {
+        continue;
+      }
+
+      bool diag_1 = grid.is_mas(v, h, []() { return move_diagonal_1(1); });
+      bool diag_2 = grid.is_mas(v, h, []() { return move_diagonal_2(1); });
+
+      if (diag_1 && diag_2) {
+        xmases += 1;
+      }
+    }
+  }
+
+  std::cout << xmases << "\n";
+}
+
+void four() { four_b(); }
