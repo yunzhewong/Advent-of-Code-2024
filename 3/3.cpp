@@ -79,4 +79,53 @@ void three_a() {
   std::cout << sum << "\n";
 }
 
-void three() { three_a(); }
+const std::string do_string = std::string("do()");
+const std::string dont_string = std::string("don't()");
+
+std::optional<bool> change_state(std::string_view view) {
+  if (std::string(view.substr(0, do_string.length())) == do_string) {
+    return true;
+  }
+
+  if (std::string(view.substr(0, dont_string.length())) == dont_string) {
+    return false;
+  }
+
+  return std::nullopt;
+}
+
+void three_b() {
+  std::ifstream file = getMainFile(3);
+
+  int sum = 0;
+  bool enabled = true;
+  std::string line;
+  while (std::getline(file, line)) {
+    std::string_view view(line);
+
+    for (size_t i = 0; i < view.length(); ++i) {
+      if (line[i] == 'm') {
+        if (!enabled) {
+          continue;
+        }
+
+        auto result = get_value(view.substr(i, MAX_LENGTH));
+        if (result.has_value()) {
+          sum += result.value();
+        }
+      }
+
+      if (line[i] == 'd') {
+        auto result = change_state(view.substr(i, dont_string.length()));
+
+        if (result.has_value()) {
+          enabled = result.value();
+        }
+      }
+    }
+  }
+
+  std::cout << sum << "\n";
+}
+
+void three() { three_b(); }

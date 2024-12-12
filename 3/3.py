@@ -1,5 +1,6 @@
 import sys
 import os
+from typing import List
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -19,7 +20,7 @@ def get_value(string: str):
 
     numerical_section = string[len("mul(") : MAX_LENGTH]
 
-    numbers = []
+    numbers: List[int] = []
     start = 0
     for i, char in enumerate(numerical_section):
         if char == ",":
