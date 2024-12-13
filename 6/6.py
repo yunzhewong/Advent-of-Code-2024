@@ -1,5 +1,6 @@
 import sys
 import os
+import time
 from typing import Callable, Dict, List, Tuple
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -40,6 +41,30 @@ def get_next_direction(direction: Tuple[int, int]):
         return (-1, 0)
 
 
+def within_map(i, j, height, width):
+    if i >= height or i < 0:
+        return False
+    if j >= width or j < 0:
+        return False
+    return True
+
+
+def next_pos(current_pos, direction):
+    next_i = current_pos[0] + direction[0]
+    next_j = current_pos[1] + direction[1]
+    return next_i, next_j
+
+
+def next_state(map, current_pos, next_pos, direction):
+    i, j = current_pos
+    next_i, next_j = next_pos
+    next_char = map[next_i][next_j]
+
+    if next_char == "#":
+        return (i, j), get_next_direction(direction)
+    return (next_i, next_j), direction
+
+
 def six_a():
     map = parse_map()
     i, j = parse_start(map)
@@ -50,30 +75,25 @@ def six_a():
 
     while True:
         map[i][j] = "X"
-        next_i = i + direction[0]
-        next_j = j + direction[1]
+        next_i, next_j = next_pos((i, j), direction)
 
-        if next_i >= height or next_i < 0:
+        if not within_map(next_i, next_j, height, width):
             break
 
-        if next_j >= width or next_j < 0:
-            break
-
-        next_char = map[next_i][next_j]
-
-        if next_char == "#":
-            direction = get_next_direction(direction)
-        else:
-            i = next_i
-            j = next_j
+        (i, j), direction = next_state(map, (i, j), (next_i, next_j), direction)
 
     total = 0
     for line in map:
         for char in line:
             if char == "X":
                 total += 1
-
     print(total)
+
+
+def six_b():
+    history = {}
+    history[(1, 0)] = 5
+    print(history.keys())
 
 
 if __name__ == "__main__":
