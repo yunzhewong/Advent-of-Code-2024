@@ -3,6 +3,7 @@
 #include <filing.h>
 
 #include <iostream>
+#include <unordered_set>
 
 struct Position {
   int i;
@@ -16,7 +17,7 @@ struct Position {
 template <>
 struct std::hash<Position> {
   std::size_t operator()(const Position& pos) const {
-    return std::hash<int>()(pos.i) * 31 + std::hash<int>()(pos.j);
+    return pos.i * 150 + pos.j;
   }
 };
 
@@ -25,43 +26,37 @@ struct Direction {
   int h;
 };
 
-Position get_next_position(Position& current, Direction& direction) {
+Position get_next_position(const Position& current,
+                           const Direction& direction) {
   return Position{current.i + direction.v, current.j + direction.h};
 }
 
-Direction get_next_direction(Direction& direction) {
-  if (direction.v == -1 && direction.h == 0) {
-    return Direction{0, 1};
-  }
-  if (direction.v == 0 && direction.h == 1) {
-    return Direction{1, 0};
-  }
-  if (direction.v == 1 && direction.h == 0) {
-    return Direction{0, -1};
-  }
-  if (direction.v == 0 && direction.h == -1) {
-    return Direction{-1, 0};
-  }
-  throw std::runtime_error("Incorrect Direction");
+Direction get_next_direction(const Direction& direction) {
+  return Direction{direction.h, -1 * direction.v};
 }
 
 class Map {
  private:
   std::vector<std::string> m_data;
   Position m_start_pos;
+  int m_height;
+  int m_width;
 
  public:
   Map() {
     operate_on_lines(6, [&](std::string line) { m_data.push_back(line); });
-    for (size_t i = 0; i < m_data.size(); ++i) {
-      for (size_t j = 0; j < m_data[0].size(); ++j) {
+    m_height = (int)m_data.size();
+    m_width = (int)m_data[0].size();
+
+    for (int i = 0; i < m_height; ++i) {
+      for (int j = 0; j < m_width; ++j) {
         char curr_char = m_data[i][j];
 
         if (curr_char != '^') {
           continue;
         }
 
-        m_start_pos = Position{(int)i, (int)j};
+        m_start_pos = {(int)i, (int)j};
         return;
       }
     }
@@ -70,27 +65,21 @@ class Map {
 
   const Position& get_start() const { return m_start_pos; }
 
-  bool position_within_map(Position& position) {
-    if (position.i >= (int)m_data.size() || position.i < 0) {
-      return false;
-    }
-
-    if (position.j >= (int)m_data[0].size() || position.j < 0) {
-      return false;
-    }
-    return true;
+  bool position_within_map(const Position& position) {
+    return position.i >= 0 && position.i < m_height && position.j >= 0 &&
+           position.j < m_width;
   }
 
-  std::pair<Position, Direction> next_state(Position& current, Position& next,
-                                            Direction& direction) {
-    char next_char = m_data[next.i][next.j];
-    if (next_char == '#') {
-      return std::pair(current, get_next_direction(direction));
+  inline std::pair<Position, Direction> next_state(const Position& current,
+                                                   const Position& next,
+                                                   const Direction& direction) {
+    if (m_data[next.i][next.j] == '#') {
+      return std::make_pair(current, get_next_direction(direction));
     }
-    return std::pair(next, direction);
+    return std::make_pair(next, direction);
   }
 
-  void iterate_through(std::function<bool(Position&, Direction&)> fn) {
+  void iterate_through(std::function<bool(const Position&, Direction&)> fn) {
     Position position = get_start();
     Direction direction = Direction{-1, 0};
 
@@ -112,7 +101,7 @@ class Map {
     }
   }
 
-  char change_pos(Position& position, char change) {
+  char change_pos(const Position& position, char change) {
     char original = m_data[position.i][position.j];
     m_data[position.i][position.j] = change;
     return original;
@@ -135,7 +124,7 @@ class Map {
 
 void six_a() {
   Map map;
-  map.iterate_through([&](Position& pos, Direction& dir) {
+  map.iterate_through([&](const Position& pos, Direction& dir) {
     map.change_pos(pos, 'X');
     return false;
   });
@@ -145,16 +134,15 @@ void six_a() {
 
 void six_b() {
   Map map;
-  std::unordered_map<Position, bool> passed_states;
+  std::unordered_set<Position> passed_states;
 
-  map.iterate_through([&](Position& pos, Direction& dir) {
-    passed_states[pos] = true;
+  map.iterate_through([&](const Position& pos, Direction& dir) {
+    passed_states.insert(pos);
     return false;
   });
 
   int infinite_loop_count = 0;
-  for (auto kv : passed_states) {
-    Position obstacle_position = kv.first;
+  for (const Position& obstacle_position : passed_states) {
     char original = map.change_pos(obstacle_position, '#');
 
     if (original == '^') {
@@ -164,10 +152,10 @@ void six_b() {
 
     std::unordered_map<Position, std::vector<Direction>> history;
 
-    map.iterate_through([&](Position& pos, Direction& dir) {
-      for (auto old_dir : history[pos]) {
+    map.iterate_through([&](const Position& pos, Direction& dir) {
+      for (const Direction& old_dir : history[pos]) {
         if (old_dir.h == dir.h && old_dir.v == dir.v) {
-          infinite_loop_count += 1;
+          ++infinite_loop_count;
           std::cout << infinite_loop_count << "\n";
           return true;
         }

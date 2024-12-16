@@ -130,6 +130,7 @@ def six_b():
             new_history = history.get(position, [])
             if direction in new_history:
                 infinite_loops.append(obstacle_pos)
+                print(len(infinite_loops))
                 return True
             new_history.append(direction)
             history[position] = new_history
