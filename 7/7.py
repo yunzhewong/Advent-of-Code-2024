@@ -36,10 +36,12 @@ def increment_signs(signs, option_count):
     return signs
 
 
-def evaluate_option(numbers: List[int], signs: List[int]):
+def evaluate_option(numbers: List[int], signs: List[int], target: int):
     total = numbers[0]
 
     for i in range(len(signs)):
+        if total > target:
+            return 0
         sign = signs[i]
         next = numbers[i + 1]
         if sign == Operator.Multiply.value:
@@ -58,7 +60,7 @@ def numbers_meet_total(numbers: List[int], total: int, operator_options: int):
     methods = operator_options ** len(signs)
 
     for _ in range(methods):
-        if evaluate_option(numbers, signs) == total:
+        if evaluate_option(numbers, signs, total) == total:
             return True
         signs = increment_signs(signs, operator_options)
 
