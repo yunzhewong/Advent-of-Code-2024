@@ -8,6 +8,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from utils.operate_on_lines import operate_on_lines, operate_on_test
 
+# THIS IS A SLOW SOLUTION
+
 
 class Operator(Enum):
     Add = 0

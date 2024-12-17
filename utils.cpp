@@ -1,6 +1,9 @@
 #include "utils.h"
 
-std::vector<std::string> utils::split(std::string& string, char character) {
+#include <iostream>
+
+std::vector<std::string> utils::split(const std::string& string,
+                                      char character) {
   std::vector<std::string> output;
 
   size_t start = 0;

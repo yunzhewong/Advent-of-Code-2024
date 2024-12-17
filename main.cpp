@@ -1,5 +1,5 @@
 #include <iostream>
 
-#include "6.h"
+#include "7.h"
 
-int main(int, char**) { six(); }
+int main(int, char**) { seven(); }
