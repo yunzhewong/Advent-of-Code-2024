@@ -35,7 +35,7 @@ def get_disk_map(line):
     return disk_map
 
 
-def collapse_map(disk_map: List[Tuple[int, int]]):
+def collapse_map_a(disk_map: List[Tuple[int, int]]):
     forward_index = 1
     reverse_index = -1
     output = [disk_map[0]]
@@ -82,8 +82,10 @@ def compute_checksum(collapsed):
 
     for pair in collapsed:
         count, item = pair
-        for i in range(count):
-            total += item * (position + i)
+
+        if item != -1:
+            for i in range(count):
+                total += item * (position + i)
         position += count
 
     return total
@@ -92,10 +94,65 @@ def compute_checksum(collapsed):
 def nine_a():
     line = read_line()
     disk_map = get_disk_map(line)
-    collapsed = collapse_map(disk_map)
+    collapsed = collapse_map_a(disk_map)
+    total = compute_checksum(collapsed)
+    print(total)
+
+
+def find_slot(disk_map, count):
+    for i in range(len(disk_map)):
+        slot_count, slot_item = disk_map[i]
+
+        if slot_item != -1:
+            continue
+
+        if slot_count >= count:
+            return i
+
+    return -1
+
+
+def collapse_map_b(disk_map: List[Tuple[int, int]]):
+    reverse_index = len(disk_map) - 1
+
+    while reverse_index != 0:
+        move_count, move_item = disk_map[reverse_index]
+
+        if move_item == -1:
+            reverse_index -= 1
+            continue
+
+        slot_index = find_slot(disk_map, move_count)
+
+        if slot_index == -1:
+            reverse_index -= 1
+            continue
+
+        if reverse_index <= slot_index:
+            reverse_index -= 1
+            continue
+
+        slot_count, _ = disk_map[slot_index]
+
+        if slot_count == move_count:
+            disk_map[slot_index] = (slot_count, move_item)
+            disk_map[reverse_index] = (move_count, -1)
+        else:
+            disk_map[slot_index] = (slot_count - move_count, -1)
+            disk_map[reverse_index] = (move_count, -1)
+            disk_map.insert(slot_index, (move_count, move_item))
+            reverse_index -= 1
+        reverse_index -= 1
+    return disk_map
+
+
+def nine_b():
+    line = read_line()
+    disk_map = get_disk_map(line)
+    collapsed = collapse_map_b(disk_map)
     total = compute_checksum(collapsed)
     print(total)
 
 
 if __name__ == "__main__":
-    nine_a()
+    nine_b()
