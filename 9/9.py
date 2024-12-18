@@ -99,8 +99,8 @@ def nine_a():
     print(total)
 
 
-def find_slot(disk_map, count):
-    for i in range(len(disk_map)):
+def find_slot(disk_map, count, reverse_index):
+    for i in range(reverse_index):
         slot_count, slot_item = disk_map[i]
 
         if slot_item != -1:
@@ -112,37 +112,62 @@ def find_slot(disk_map, count):
     return -1
 
 
-def collapse_map_b(disk_map: List[Tuple[int, int]]):
-    reverse_index = len(disk_map) - 1
+def combine_empties(disk_map: List[Tuple[int, int]]):
+    unemptied = []
 
-    while reverse_index != 0:
-        move_count, move_item = disk_map[reverse_index]
+    running_count = 0
+    for pair in disk_map:
+        count, item = pair
+
+        if item != -1:
+            if running_count != 0:
+                unemptied.append((running_count, -1))
+                running_count = 0
+            unemptied.append(pair)
+        else:
+            running_count += count
+
+    if running_count != 0:
+        unemptied.append((running_count, -1))
+    return unemptied
+
+
+def find_index(id, disk_map):
+    for i in range(len(disk_map)):
+        if disk_map[i][1] == id:
+            return i
+    return -1
+
+
+def collapse_map_b(disk_map: List[Tuple[int, int]]):
+    ids = [id for (_, id) in disk_map]
+    current_id = max(ids)
+
+    while current_id != 0:
+        print(current_id)
+        disk_map = combine_empties(disk_map)
+
+        id_index = find_index(current_id, disk_map)
+
+        move_count, move_item = disk_map[id_index]
 
         if move_item == -1:
-            reverse_index -= 1
+            current_id -= 1
             continue
 
-        slot_index = find_slot(disk_map, move_count)
+        slot_index = find_slot(disk_map, move_count, id_index)
 
         if slot_index == -1:
-            reverse_index -= 1
-            continue
-
-        if reverse_index <= slot_index:
-            reverse_index -= 1
+            current_id -= 1
             continue
 
         slot_count, _ = disk_map[slot_index]
 
-        if slot_count == move_count:
-            disk_map[slot_index] = (slot_count, move_item)
-            disk_map[reverse_index] = (move_count, -1)
-        else:
-            disk_map[slot_index] = (slot_count - move_count, -1)
-            disk_map[reverse_index] = (move_count, -1)
-            disk_map.insert(slot_index, (move_count, move_item))
-            reverse_index -= 1
-        reverse_index -= 1
+        disk_map[slot_index] = (slot_count - move_count, -1)
+        disk_map[id_index] = (move_count, -1)
+        disk_map.insert(slot_index, (move_count, move_item))
+        current_id -= 1
+
     return disk_map
 
 
