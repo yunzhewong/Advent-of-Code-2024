@@ -45,7 +45,7 @@ def in_map(map, position):
 DIRECTIONS = [(0, 1), (1, 0), (0, -1), (-1, 0)]
 
 
-def found_nine(position, map):
+def found_nine_positions(position, map):
     i, j = position
     current_height = map[i][j]
 
@@ -65,7 +65,7 @@ def found_nine(position, map):
         if next_height != current_height + 1:
             continue
 
-        new_positions = found_nine(next_position, map)
+        new_positions = found_nine_positions(next_position, map)
 
         for new_position in new_positions:
             if new_position in positions:
@@ -82,11 +82,48 @@ def ten_a():
 
     total = 0
     for head in heads:
-        res = found_nine(head, map)
+        res = found_nine_positions(head, map)
         total += len(res)
 
     print(total)
 
 
+def found_nine_count(position, map):
+    i, j = position
+    current_height = map[i][j]
+
+    if current_height == 9:
+        return 1
+
+    total = 0
+    for direction in DIRECTIONS:
+        next_position = (position[0] + direction[0], position[1] + direction[1])
+
+        if not in_map(map, next_position):
+            continue
+
+        next_i, next_j = next_position
+        next_height = map[next_i][next_j]
+
+        if next_height != current_height + 1:
+            continue
+
+        total += found_nine_count(next_position, map)
+
+    return total
+
+
+def ten_b():
+    map = parse_map()
+    heads = find_heads(map)
+
+    total = 0
+    for head in heads:
+        res = found_nine_count(head, map)
+        total += res
+
+    print(total)
+
+
 if __name__ == "__main__":
-    ten_a()
+    ten_b()
