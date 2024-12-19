@@ -39,7 +39,7 @@ def search(position, nodeFn, searchFn):
     for direction in DIRECTIONS:
         next_position = (position[0] + direction[0], position[1] + direction[1])
 
-        if not searchFn(next_position):
+        if not searchFn(next_position, direction):
             continue
 
         search(next_position, nodeFn, searchFn)
@@ -52,7 +52,7 @@ def search_for_region(grid, position):
     def nodeFn(current_position):
         same_region.append(current_position)
 
-    def continueFn(next_position):
+    def continueFn(next_position, _):
         if next_position in same_region:
             return False
 
@@ -88,32 +88,29 @@ def identify_regions(grid):
     return regions
 
 
-def search_perimeter_length(grid, region):
+def search_perimeter(grid, region):
     perimeter_positions = []
 
     def nodeFn(current_position):
         pass
 
-    def searchFn(next_position):
+    def searchFn(next_position, direction):
         if next_position in region:
             return False
 
-        perimeter_positions.append(next_position)
+        perimeter_positions.append((next_position, direction))
 
         return False
 
     for position in region:
         search(position, nodeFn, searchFn)
 
-    return len(perimeter_positions)
+    return perimeter_positions
 
 
 def compute_cost(grid, region):
-    i, j = region[0]
-
     area = len(region)
-    perimeter = search_perimeter_length(grid, region)
-
+    perimeter = len(search_perimeter(grid, region))
     return area * perimeter
 
 
@@ -126,5 +123,60 @@ def twelve_a():
     print(total)
 
 
+def search_side_count(grid, region, log):
+    perimeter_positions = search_perimeter(grid, region)
+
+    grouped_by_position = {}
+    for position, direction in perimeter_positions:
+        arr = grouped_by_position.get(position, [])
+        arr.append(direction)
+        grouped_by_position[position] = arr
+
+    encountered = []
+    unique_sides = 0
+
+    for position, movement_dir in perimeter_positions:
+        if (position, movement_dir) in encountered:
+            continue
+
+        same_movement_dirs = []
+
+        def nodeFn(current_position):
+            same_movement_dirs.append((current_position, movement_dir))
+
+        def searchFn(next_position, _):
+            if (next_position, movement_dir) in same_movement_dirs:
+                return False
+
+            matching_directions = grouped_by_position.get(next_position, None)
+            if matching_directions is None:
+                return False
+
+            if movement_dir in matching_directions:
+                return True
+            return False
+
+        search(position, nodeFn, searchFn)
+        encountered += same_movement_dirs
+        unique_sides += 1
+
+    return unique_sides
+
+
+def compute_bulk_cost(grid, region):
+    area = len(region)
+    side_count = search_side_count(grid, region, area == 4)
+    return area * side_count
+
+
+def twelve_b():
+    grid = parse_grid()
+    regions = identify_regions(grid)
+    total = 0
+    for region in regions:
+        total += compute_bulk_cost(grid, region)
+    print(total)
+
+
 if __name__ == "__main__":
-    twelve_a()
+    twelve_b()
