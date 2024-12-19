@@ -41,10 +41,42 @@ def blink_stones(stones):
 
 def eleven_a():
     stones = get_initial_stones()
-    for _ in range(25):
+    iters = 25
+    for i in range(iters):
         stones = blink_stones(stones)
     print(len(stones))
 
 
+def compute_length_after_iters(stone, iters, memory: Dict[int, Dict[int, int]]):
+    if iters == 0:
+        return 1
+
+    next_map = memory.get(stone, None)
+    if next_map is not None:
+        next_length = next_map.get(iters, None)
+        if next_length is not None:
+            return next_length
+
+    next_stones = blink_stone(stone)
+    length = 0
+    for next_stone in next_stones:
+        length += compute_length_after_iters(next_stone, iters - 1, memory)
+
+    next_map = memory.get(stone, {})
+    next_map[iters] = length
+    memory[stone] = next_map
+    return length
+
+
+def eleven_b():
+    stones = get_initial_stones()
+    memory = {}
+    iters = 75
+    length = 0
+    for stone in stones:
+        length += compute_length_after_iters(stone, iters, memory)
+    print(length)
+
+
 if __name__ == "__main__":
-    eleven_a()
+    eleven_b()
