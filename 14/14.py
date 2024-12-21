@@ -82,6 +82,17 @@ def get_safety_factor(state):
     print(product)
 
 
+def pretty_print_state(state):
+    for line in state:
+        string = ""
+        for char in line:
+            if char == 0:
+                string += "."
+            else:
+                string += str(char)
+        print(string)
+
+
 def fourteen_a():
     robots = parse_robots()
 
@@ -95,5 +106,48 @@ def fourteen_a():
     get_safety_factor(state)
 
 
+def count_repeats(l: List[int]):
+    reps = 0
+    max_reps = 0
+    for i in range(len(l)):
+        if l[i] > 0:
+            reps += 1
+            max_reps = max(max_reps, reps)
+        else:
+            reps = 0
+
+    return max_reps
+
+
+def count_longest_line(state):
+    max_length = 0
+    for line in state:
+        max_length = max(max_length, count_repeats(line))
+
+    return max_length
+
+
+def fourteen_b():
+    robots = parse_robots()
+
+    iter = 0
+    while True:
+        state = [[0 for _ in range(BOARD_SIZE[0])] for _ in range(BOARD_SIZE[1])]
+
+        for robot in robots:
+            raw_position = compute_raw_position(robot, iter)
+            i, j = wrap_position(raw_position)
+            state[j][i] += 1
+
+        longest_length = count_longest_line(state)
+
+        if longest_length > 10:
+            print(longest_length)
+            print(iter)
+            pretty_print_state(state)
+
+        iter += 1
+
+
 if __name__ == "__main__":
-    fourteen_a()
+    fourteen_b()
