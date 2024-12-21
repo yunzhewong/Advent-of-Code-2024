@@ -99,5 +99,31 @@ def thirteen_a():
     print(total)
 
 
+MODIFICATION = 10000000000000
+
+
+def modify_game(game):
+    x_before, y_before = game[2]
+    x_after = x_before + MODIFICATION
+    y_after = y_before + MODIFICATION
+    return game[0], game[1], (x_after, y_after)
+
+
+def thirteen_b():
+    games = parse_input()
+    total = 0
+
+    for game in games:
+        modified_game = modify_game(game)
+        solution = get_game_solution(modified_game)
+        # print(solution)
+        if solution is None:
+            continue
+        cost = evaluate_solution_cost(solution)
+        total += cost
+
+    print(total)
+
+
 if __name__ == "__main__":
-    thirteen_a()
+    thirteen_b()
