@@ -85,5 +85,76 @@ def sixteen_a():
         queue.sort(key=sortkey)
 
 
+def sixteen_b():
+    maze = read_maze()
+
+    def sortkey(obj):
+        return obj[0]
+
+    start_pos = find_start(maze)
+
+    queue = [(0, start_pos, (0, 1), [start_pos])]
+
+    best_score = None
+    best_positions = []
+    while True:
+        if len(queue) == 0:
+            break
+
+        (score, position, direction, positions) = queue.pop(0)
+        print(score)
+
+        if maze[position[0]][position[1]] == "E":
+            if not best_score:
+                best_score = score
+
+            if score != best_score:
+                break
+
+            best_positions += positions
+
+            print(score, best_score)
+
+            continue
+
+        next_pos = move(position, direction)
+        if not is_wall(maze, next_pos):
+            queue.append((score + 1, next_pos, direction, positions + [next_pos]))
+
+        clockwise_dir = rotate_clockwise(direction)
+        clockwise_pos = move(position, clockwise_dir)
+        if not is_wall(maze, clockwise_pos):
+            queue.append(
+                (
+                    score + 1001,
+                    clockwise_pos,
+                    clockwise_dir,
+                    positions + [clockwise_pos],
+                )
+            )
+
+        counterclockwise_dir = rotate_counterclockwise(direction)
+        counterclockwise_pos = move(position, counterclockwise_dir)
+        if not is_wall(maze, counterclockwise_pos):
+            queue.append(
+                (
+                    score + 1001,
+                    counterclockwise_pos,
+                    counterclockwise_dir,
+                    positions + [counterclockwise_pos],
+                )
+            )
+
+        queue.sort(key=sortkey)
+
+    unique_positions = set(best_positions)
+    for position in unique_positions:
+        maze[position[0]][position[1]] = "O"
+
+    for line in maze:
+        print("".join(line))
+    print(len(unique_positions))
+
+
 if __name__ == "__main__":
-    sixteen_a()
+    sixteen_b()
