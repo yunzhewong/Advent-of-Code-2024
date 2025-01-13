@@ -85,24 +85,44 @@ def sixteen_a():
         queue.sort(key=sortkey)
 
 
+def is_worse_score(visited, score, position, direction):
+    previous_best_score = visited.get((position, direction), None)
+
+    if previous_best_score is None:
+        return False
+
+    return score > previous_best_score
+
+
 def sixteen_b():
     maze = read_maze()
-
-    def sortkey(obj):
-        return obj[0]
-
     start_pos = find_start(maze)
 
     queue = [(0, start_pos, (0, 1), [start_pos])]
 
     best_score = None
     best_positions = []
+
+    visited = {}
     while True:
         if len(queue) == 0:
             break
 
-        (score, position, direction, positions) = queue.pop(0)
+        lowest_score = float("inf")
+        lowest_index = -1
+
+        for i in range(len(queue)):
+            if queue[i][0] < lowest_score:
+                lowest_index = i
+                lowest_score = queue[i][0]
+
+        (score, position, direction, positions) = queue.pop(lowest_index)
+        if is_worse_score(visited, score, position, direction):
+            continue
+
         print(score)
+
+        visited[(position, direction)] = score
 
         if maze[position[0]][position[1]] == "E":
             if not best_score:
@@ -118,12 +138,16 @@ def sixteen_b():
             continue
 
         next_pos = move(position, direction)
-        if not is_wall(maze, next_pos):
+        if not is_wall(maze, next_pos) and not is_worse_score(
+            visited, score + 1, next_pos, direction
+        ):
             queue.append((score + 1, next_pos, direction, positions + [next_pos]))
 
         clockwise_dir = rotate_clockwise(direction)
         clockwise_pos = move(position, clockwise_dir)
-        if not is_wall(maze, clockwise_pos):
+        if not is_wall(maze, clockwise_pos) and not is_worse_score(
+            visited, score + 1001, clockwise_pos, clockwise_dir
+        ):
             queue.append(
                 (
                     score + 1001,
@@ -135,7 +159,9 @@ def sixteen_b():
 
         counterclockwise_dir = rotate_counterclockwise(direction)
         counterclockwise_pos = move(position, counterclockwise_dir)
-        if not is_wall(maze, counterclockwise_pos):
+        if not is_wall(maze, counterclockwise_pos) and not is_worse_score(
+            visited, score + 1001, counterclockwise_pos, counterclockwise_dir
+        ):
             queue.append(
                 (
                     score + 1001,
@@ -144,8 +170,6 @@ def sixteen_b():
                     positions + [counterclockwise_pos],
                 )
             )
-
-        queue.sort(key=sortkey)
 
     unique_positions = set(best_positions)
     for position in unique_positions:
